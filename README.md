@@ -1,8 +1,10 @@
 
+pip install pymsteams
+pip install gpiozero
+pip install RPi.GPIO
 
 pip3 install pytest
 pip3 install pytest-watch
-pip install pymsteams
 
 To watch tests:
 $ ptw
