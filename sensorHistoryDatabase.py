@@ -4,15 +4,14 @@ from time import time, ctime
 class SensorHistoryDatabase:
 
     def hasBeenRunningRecently(self):
-        nowMinusABit = time()-4000
+        nowMinusABit = time()-60
 
         with open('logs.log', 'r') as f:
             logLines = f.readlines()
             logLines.reverse()
-            print(logLines)
+            # print(logLines)
 
             for line in logLines:
-                print("LOOP")
                 lineBits = line.strip().split("|")
 
                 lineTime = int(lineBits[0])
@@ -24,7 +23,7 @@ class SensorHistoryDatabase:
                     return False
 
         # TODO: this logic is wrong
-        print("NO WAY")
+        print("It has been running recently")
         return True
 
     def logRunningEvent(self):
