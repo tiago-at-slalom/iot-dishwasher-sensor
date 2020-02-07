@@ -11,14 +11,14 @@ class PowerSensor:
         try:
             # self.sensor = SmoothedInputDevice(14)#, threshold = 1)
             GPIO.setmode(GPIO.BCM)           # Set's GPIO pins to BCM GPIO numbering
-            GPIO.setup(INPUT_PIN, GPIO.IN)           # Set our input pin to be an input
+            GPIO.setup(self.INPUT_PIN, GPIO.IN)           # Set our input pin to be an input
         except:
             print("Exception: Problem connecting to Input")
     
     def isMachineWorking(self):
         try:
             # return self.sensor.is_active()
-            result = GPIO.input(INPUT_PIN)
+            result = GPIO.input(self.INPUT_PIN)
             print("Value read in the sensor: " + result)
             return result == True
         except Exception as ex:
