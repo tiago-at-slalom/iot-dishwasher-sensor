@@ -19,7 +19,7 @@ class PowerSensor:
         try:
             # return self.sensor.is_active()
             result = GPIO.input(self.INPUT_PIN)
-            print("Value read in the sensor: " + result)
+            print("Value read in the sensor: " + str(result))
             return result == True
         except Exception as ex:
             print("Exception: Problem reading sensor values")
