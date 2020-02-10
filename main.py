@@ -26,6 +26,7 @@ def checkDishwasherStatus():
         hasBeenRunningRecently = sensorHistory.hasBeenRunningRecently()
         if hasBeenRunningRecently:
             msTeamsConnector.sendMessage("The machine just finished running")
+            sensorHistory.logAlertSentEvent()
             return 1
     else:
         sensorHistory.logRunningEvent()

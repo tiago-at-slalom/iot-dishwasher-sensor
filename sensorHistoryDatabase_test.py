@@ -31,22 +31,24 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
             
             mock_open().write.assert_called_once_with(Regex("[0-9]*[|]+.*[|]+MACHINE_NOT_RUNNING\\n"))
 
-    def test_whenMachineHasBeenRunningRecently(self):
-        now = time()
-        data = ("%d|PrettyDate|MACHINE_RUNNING\n"
-                "%d|PrettyDate|MACHINE_RUNNING\n") % (now-2000, now-1000)
-        temp_mock = mock.mock_open(read_data = data)
+    def test_whenAAlertSentEventIsLogged(self):
+        temp_mock = mock.mock_open()
 
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
             shdb = SensorHistoryDatabase()
-            assert shdb.hasBeenRunningRecently()
+            shdb.logAlertSentEvent()
+            
+            mock_open().write.assert_called_once_with(Regex("[0-9]*[|]+.*[|]+ALERT_SENT\\n"))
 
-    def test_whenMachineHasNotBeenRunningRecently(self):
+    #RUNNING, NOT_RUNNING and ALERT CASES
+
+    def test_whenMachineNeverRun(self):
         now = time()
-        data = ("%d|PrettyDate|MACHINE_RUNNING\n"
-                "%d|PrettyDate|MACHINE_RUNNING\n") % (now-2000000, now-10000000)
+        data = ("%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n") % (now-100, now-20, now-10)
         temp_mock = mock.mock_open(read_data = data)
 
         with mock.patch('sensorHistoryDatabase.open',
@@ -55,10 +57,131 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
             shdb = SensorHistoryDatabase()
             assert not shdb.hasBeenRunningRecently()
 
-    def test_whenMachineFinishHasBeenProcessedRecently(self):
+    def test_whenMachineNeverRunAndJustStarted(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n") % (now-30, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert not shdb.hasBeenRunningRecently()
+
+    def test_whenMachineJustStartedRunning(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n") % (now-100, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert not shdb.hasBeenRunningRecently()
+
+    def test_whenMachineIsRunning(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n") % (now-100, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert not shdb.hasBeenRunningRecently()
+
+    def test_whenMachineIsNotRunningAfterBeingRunningAndAnAlertAsBeenSent(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|ALERT_SENT\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n") % (now-30, now-30, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert not shdb.hasBeenRunningRecently()
+
+    def test_whenMachineWasRunningAndAnAlertAsBeenSent(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|ALERT_SENT\n") % (now-100, now-30, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert not shdb.hasBeenRunningRecently()
+
+    def test_whenMachineHasBeenRunning(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n") % (now-100, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert not shdb.hasBeenRunningRecently()
+
+    def test_whenMachineIsNotRunningButWasRunningNotLongAgo(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n") % (now-100, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert shdb.hasBeenRunningRecently()
+
+    def test_whenMachineIsNotRunningAndItRunAlreadySinceTheLastAlert(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|ALERT_SENT\n"
+                "%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n") % (now-100, now-30, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert shdb.hasBeenRunningRecently()
+
+    def test_whenMachineIsNotRunningAndItRunAlreadySinceTheLastAlertWasSentSomeTimeAgo(self):
         now = time()
         data = ("%d|PrettyDate|ALERT_SENT\n"
-                "%d|PrettyDate|MACHINE_RUNNING\n") % (now-2000, now-1000)
+                "%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n") % (now-100, now-20, now-10)
+        temp_mock = mock.mock_open(read_data = data)
+
+        with mock.patch('sensorHistoryDatabase.open',
+                    temp_mock,
+                    create=True) as mock_open:
+            shdb = SensorHistoryDatabase()
+            assert shdb.hasBeenRunningRecently()
+
+    def test_whenMachineIsNotRunningAndItRunSomeTimeAgo(self):
+        now = time()
+        data = ("%d|PrettyDate|MACHINE_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n"
+                "%d|PrettyDate|MACHINE_NOT_RUNNING\n") % (now-100, now-20, now-10)
         temp_mock = mock.mock_open(read_data = data)
 
         with mock.patch('sensorHistoryDatabase.open',
