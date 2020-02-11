@@ -1,15 +1,12 @@
-# from gpiozero import SmoothedInputDevice
 import RPi.GPIO as GPIO 
 
 class PowerSensor:
-    # sensorAdaptor = None # Do we need this?
     sensor = None
-    INPUT_PIN = 14           # Sets our input pin, in this example I'm connecting our button to pin 4. Pin 0 is the SDA pin so I avoid using it for sensors/buttons
+    INPUT_PIN = -1 # Raspberry Pi pin number to read the sensor values
 
-    def __init__(self, sa):
-        # self.sensorAdaptor = sa
+    def __init__(self, input_pin):
+        self.INPUT_PIN = input_pin
         try:
-            # self.sensor = SmoothedInputDevice(14)#, threshold = 1)
             GPIO.setmode(GPIO.BCM)           # Set's GPIO pins to BCM GPIO numbering
             GPIO.setup(self.INPUT_PIN, GPIO.IN)           # Set our input pin to be an input
         except:
@@ -17,9 +14,7 @@ class PowerSensor:
     
     def isMachineWorking(self):
         try:
-            # return self.sensor.is_active()
             result = GPIO.input(self.INPUT_PIN)
-            print("Value read in the sensor: " + str(result))
             return result == True
         except Exception as ex:
             print("Exception: Problem reading sensor values")

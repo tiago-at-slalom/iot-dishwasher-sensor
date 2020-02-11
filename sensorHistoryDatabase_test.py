@@ -8,15 +8,18 @@ from callee import Regex
 from time import time
 
 class SensorHistoryDatabaseTestCase(unittest.TestCase):
+    shdb = None
 
+    def setUp(self):
+        self.shdb = SensorHistoryDatabase(60)
+        
     def test_whenARunningEventIsLogged(self):
         temp_mock = mock.mock_open()
 
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            shdb.logRunningEvent()
+            self.shdb.logRunningEvent()
             
             mock_open().write.assert_called_once_with(Regex("[0-9]*[|]+.*[|]+MACHINE_RUNNING\\n"))
 
@@ -26,8 +29,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            shdb.logNotRunningEvent()
+            self.shdb.logNotRunningEvent()
             
             mock_open().write.assert_called_once_with(Regex("[0-9]*[|]+.*[|]+MACHINE_NOT_RUNNING\\n"))
 
@@ -37,8 +39,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            shdb.logAlertSentEvent()
+            self.shdb.logAlertSentEvent()
             
             mock_open().write.assert_called_once_with(Regex("[0-9]*[|]+.*[|]+ALERT_SENT\\n"))
 
@@ -54,8 +55,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineNeverRunAndJustStarted(self):
         now = time()
@@ -67,8 +67,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineJustStartedRunning(self):
         now = time()
@@ -80,8 +79,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineIsRunning(self):
         now = time()
@@ -93,8 +91,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineIsNotRunningAfterBeingRunningAndAnAlertAsBeenSent(self):
         now = time()
@@ -107,8 +104,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineWasRunningAndAnAlertAsBeenSent(self):
         now = time()
@@ -121,8 +117,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineHasBeenRunning(self):
         now = time()
@@ -134,8 +129,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineIsNotRunningButWasRunningNotLongAgo(self):
         now = time()
@@ -147,8 +141,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert shdb.hasBeenRunningRecently()
+            assert self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineIsNotRunningAndItRunAlreadySinceTheLastAlert(self):
         now = time()
@@ -161,8 +154,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert shdb.hasBeenRunningRecently()
+            assert self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineIsNotRunningAndItRunAlreadySinceTheLastAlertWasSentSomeTimeAgo(self):
         now = time()
@@ -174,8 +166,7 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert shdb.hasBeenRunningRecently()
+            assert self.shdb.hasBeenRunningRecently()
 
     def test_whenMachineIsNotRunningAndItRunSomeTimeAgo(self):
         now = time()
@@ -187,7 +178,6 @@ class SensorHistoryDatabaseTestCase(unittest.TestCase):
         with mock.patch('sensorHistoryDatabase.open',
                     temp_mock,
                     create=True) as mock_open:
-            shdb = SensorHistoryDatabase()
-            assert not shdb.hasBeenRunningRecently()
+            assert not self.shdb.hasBeenRunningRecently()
         
 
