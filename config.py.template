@@ -1,0 +1,9 @@
+
+# Microsoft Teams web hook
+teamsWebHook = "https://outlook.office.com/webhook/[XXXXXX]/IncomingWebhook/[YYYYYY]"
+
+# time in seconds that we will look back in the logs history for an event to alert
+lookupTime = 600
+
+# GPIO pin where the sensor is connected 
+raspberryInputPin = 14
