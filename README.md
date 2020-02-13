@@ -55,14 +55,14 @@ App configuration is done in the "config.py" file. To get start we can copy the 
 
 For a one time run of the application, run the following command:
 
-''' sudo python3 main.py '''
+``` sudo python3 main.py ```
 
 For the real life operation you will want to setup a cron job to run the application regularly. To do so follow these steps:
-1. run ''' crontab -e '''
+1. run ``` crontab -e ```
 2. select and editor from the list (if you don't know what to pick, nano will work)
 3. Navigate to the bottom of the file and add this text to a new line
 
-''' * 8-19 * * 1-5 sudo python3 [app_path]/main.py '''
+``` * 8-19 * * 1-5 sudo python3 [app_path]/main.py ```
 
 (this will setup a task that will run our app every minute between 8am and 7pm only on week days)
 
